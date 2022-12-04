@@ -1,11 +1,12 @@
-import fs from 'fs';
+import * as common from '../common/index'
 
 function main() {
     let calories: number[] = [];
     let currentCalories: number = 0;
 
-    const allFileContents = fs.readFileSync('input.txt', 'utf-8');
-    allFileContents.split(/\r?\n/).forEach((line: string) => {
+    const lines = common.getFileLines('input.txt');
+
+    lines.forEach((line: string) => {
         if (line === '') {
             calories.push(currentCalories);
             currentCalories = 0;

@@ -1,40 +1,35 @@
 import * as common from '../common/index'
 
-let last4: string[] = [];
+const AMOUNT: number = 14;
+let lastX: string[] = [];
 
 function challenge1() {
-    const line = common.getFileLines('test.txt')[0];
+    const line = common.getFileLines('input.txt')[0];
     let chars = [...line];
-    // last4 = chars.slice(0,2);
-    // chars = chars.slice(2);
     for (const {c, i} of chars.map((c,i) => ({c,i}))) {
-        if (check(c)) {
-            console.log(i);
+        if (markerFound(c)) {
+            console.log(i + 1);
             break;
-        };
-        // console.log(c, last4)
-    }
-}
-
-function check(char: string): boolean {
-    if (last4.length == 4) {
-        let different = true;
-        for (let i = 0; i < 3; i++) {
-            if (last4[i] == last4[3]) return false;
         }
-        last4 = last4.slice(-1)
-        last4.push(char)
-        console.log(last4)
-        return different;
-    } else {
-        last4.push(char);
-        return false;
     }
 }
 
-function challenge2() {
-    const line = common.getFileLines('test.txt')[0];
+function markerFound(char: string): boolean {
+    lastX.push(char)
+
+    if (lastX.length >= AMOUNT) {
+        if (lastX.length == AMOUNT + 1) lastX = lastX.slice(-AMOUNT)
+
+        for (let i = 0; i < AMOUNT; i++) {
+            for (let j = 0; j < AMOUNT; j++) {
+                if (i < j && lastX[i] == lastX[j]) return false;
+            }
+        }
+        
+        return true;
+    }
+
+    return false;
 }
 
 challenge1();
-// challenge2();

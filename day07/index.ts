@@ -5,18 +5,20 @@ class Dir {
     size: number = 0;
     children: Dir[] = [];
     parent: Dir | null;
+    level: number;
 
-    constructor(name: string, parent: Dir | null) {
+    constructor(name: string, parent: Dir | null, level: number) {
         this.name = name;
         this.parent = parent;
+        this.level = level;
     }
 }
 
 let knownDirs: Dir[] = [];
 let currDir: Dir;
 
-function challenge1() {
-    currDir = new Dir('/', null);
+function main() {
+    currDir = new Dir('~', null, 0);
     knownDirs.push(currDir);
 
     const lines = common.getFileLines('input.txt');
@@ -26,10 +28,9 @@ function challenge1() {
         else handleLsLine(line);
     });
 
-    // knownDirs.forEach(d => console.log(`${d.name} = ${d.size}`))
     setActualDirSize();
-    // knownDirs.forEach(d => console.log(`${d.name} = ${d.size}`))
-    printResult();
+    // printResult1();
+    printResult2();
 }
 
 function handleCd(name: string) {
@@ -38,14 +39,12 @@ function handleCd(name: string) {
             if (currDir.parent) currDir = currDir.parent!;
             break;
         case '/':
-            currDir = knownDirs.filter(d => d.name == name)[0]
+            currDir = knownDirs.filter(d => d.name == '~')[0]
             break;
         default:
-            if (!knownDirs.map(d => d.name).includes(name)) {
-                currDir.children.push(new Dir(name, currDir));
-                currDir = currDir.children.filter(d => d.name == name)[0];
-                knownDirs.push(currDir);
-            }
+            currDir.children.push(new Dir(name, currDir, currDir.level + 1));
+            currDir = currDir.children.filter(d => d.name == name)[0];
+            knownDirs.push(currDir);
     }
 }
 
@@ -55,27 +54,31 @@ function handleLsLine(line: string) {
 }
 
 function setActualDirSize() {
-    let addedDirNames: string[] = [];
-    knownDirs.filter(d => d.children.length == 0).forEach(d => {
-        let parent = d.parent;
-        while (parent && !addedDirNames.includes(parent.name)) {
-            parent.children.forEach(c => parent!.size += c.size);
-            addedDirNames.push(parent!.name)
-            parent = parent!.parent;
-        }
-    })
+    knownDirs.sort((d1, d2) => d2.level - d1.level).forEach(d =>
+        d.children.forEach(c => d.size += c.size)
+    )
 }
 
-function printResult() {
+function printResult1() {
     let result = 0;
     knownDirs.forEach(d => d.size <= 100000 ? result += d.size : null);
     console.log(result);
 }
 
-function challenge2() {
-    const lines = common.getFileLines('test.txt');
-    lines.forEach(line => { });
+function printResult2() {
+    const spaceToClear = 30000000 - (70000000 - knownDirs.find(d => d.level == 0)!.size);
+    console.log(spaceToClear);
+    const dirs = knownDirs.filter(d => d.size >= spaceToClear).sort((d1, d2) => d1.size - d2.size);
+    dirs.forEach(d => console.log(d.name, d.size))
 }
 
-challenge1();
-// challenge2();
+function getFullPath(dir: Dir) {
+    let path = dir.name;
+    while (dir.parent) {
+        path = dir.parent.name + '/' + path;
+        dir = dir!.parent;
+    }
+    return path;
+}
+
+main();
